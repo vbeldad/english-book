@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Book - Visor Interactivo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .viewer {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f5f5f5;
+            overflow: auto;
+            position: relative;
+        }
+        
+        .page-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            user-select: none;
+            transition: transform 0.1s ease;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #667eea;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .controls {
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .page-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .page-slider {
+            flex: 1;
+            min-width: 200px;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+        
+        .page-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+        
+        .page-slider::-webkit-slider-thumb:hover {
+            background: #5568d3;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+        }
+        
+        .page-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+        
+        .page-slider::-moz-range-thumb:hover {
+            background: #5568d3;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+        }
+        
+        .zoom-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .zoom-display {
+            font-size: 13px;
+            color: #666;
+            min-width: 45px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .mini-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .mini-buttons button {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+                max-height: 100vh;
+            }
+            
+            .controls {
+                flex-direction: column;
+                padding: 15px;
+            }
+            
+            .page-slider {
+                width: 100%;
+            }
+            
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            button {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📖 English Book</h1>
+            <p>Visor interactivo de ejercicios</p>
+        </div>
+        
+        <div class="viewer" id="viewer">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Cargando página...</p>
+            </div>
+            <img id="pageImage" class="page-image" alt="Página del libro">
+        </div>
+        
+        <div class="controls">
+            <div class="nav-buttons">
+                <button id="prevBtn" onclick="previousPage()">← Anterior</button>
+                <button id="nextBtn" onclick="nextPage()">Siguiente →</button>
+            </div>
+            
+            <div class="page-info">
+                <span>Página <span id="currentPage">1</span> de <span id="totalPages">24</span></span>
+                <input type="range" id="pageSlider" class="page-slider" min="1" max="24" value="1" 
+                       oninput="goToPage(this.value)">
+            </div>
+            
+            <div class="zoom-buttons">
+                <div class="mini-buttons">
+                    <button onclick="zoomOut()" id="zoomOutBtn">−</button>
+                    <span class="zoom-display" id="zoomDisplay">100%</span>
+                    <button onclick="zoomIn()" id="zoomInBtn">+</button>
+                </div>
+                <button onclick="resetZoom()" style="padding: 6px 12px; font-size: 12px;">Restablecer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const totalPages = 24;
+        let currentZoom = 100;
+        const zoomStep = 10;
+        const minZoom = 50;
+        const maxZoom = 300;
+        
+        const pageImage = document.getElementById('pageImage');
+        const loading = document.getElementById('loading');
+        const currentPageSpan = document.getElementById('currentPage');
+        const pageSlider = document.getElementById('pageSlider');
+        const zoomDisplay = document.getElementById('zoomDisplay');
+        
+        // Formatos de nombres: page-000.jpg, page-001.jpg, etc.
+        function getImagePath(page) {
+            const num = String(page).padStart(3, '0');
+            return `page-${num}.jpg`;
+        }
+        
+        function loadPage(page) {
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            currentPageSpan.textContent = page;
+            pageSlider.value = page;
+            
+            loading.style.display = 'flex';
+            pageImage.style.display = 'none';
+            
+            const img = new Image();
+            img.onload = () => {
+                pageImage.src = img.src;
+                pageImage.style.display = 'block';
+                loading.style.display = 'none';
+                resetZoom();
+                updateButtonStates();
+            };
+            img.onerror = () => {
+                loading.innerHTML = '<p style="color: #d32f2f;">Error cargando la página</p>';
+            };
+            img.src = getImagePath(page);
+        }
+        
+        function previousPage() {
+            if (currentPage > 1) loadPage(currentPage - 1);
+        }
+        
+        function nextPage() {
+            if (currentPage < totalPages) loadPage(currentPage + 1);
+        }
+        
+        function goToPage(page) {
+            loadPage(parseInt(page));
+        }
+        
+        function updateZoom() {
+            pageImage.style.transform = `scale(${currentZoom / 100})`;
+            zoomDisplay.textContent = currentZoom + '%';
+        }
+        
+        function zoomIn() {
+            if (currentZoom < maxZoom) {
+                currentZoom += zoomStep;
+                updateZoom();
+            }
+        }
+        
+        function zoomOut() {
+            if (currentZoom > minZoom) {
+                currentZoom -= zoomStep;
+                updateZoom();
+            }
+        }
+        
+        function resetZoom() {
+            currentZoom = 100;
+            updateZoom();
+        }
+        
+        function updateButtonStates() {
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages;
+        }
+        
+        // Atajos de teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') previousPage();
+            if (e.key === 'ArrowRight') nextPage();
+            if (e.key === '+' || e.key === '=') zoomIn();
+            if (e.key === '-') zoomOut();
+            if (e.key === '0') resetZoom();
+        });
+        
+        // Inicializar
+        loadPage(1);
+    </script>
+</body>
+</html>
