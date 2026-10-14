@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English Book - Visor Interactivo</title>
+    <title>English File Elementary</title>
     <style>
         * {
             margin: 0;
@@ -249,8 +249,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📖 English Book</h1>
-            <p>Visor interactivo de ejercicios</p>
+            <h1>📖 English File Elementary</h1>
+            <p>5th edition · Multipack B</p>
         </div>
         
         <div class="viewer" id="viewer">
@@ -268,8 +268,8 @@
             </div>
             
             <div class="page-info">
-                <span>Página <span id="currentPage">1</span> de <span id="totalPages">24</span></span>
-                <input type="range" id="pageSlider" class="page-slider" min="1" max="24" value="1" 
+                <span>Página <span id="currentPage">1</span> de <span id="totalPages">1</span></span>
+                <input type="range" id="pageSlider" class="page-slider" min="1" max="1" value="1"
                        oninput="goToPage(this.value)">
             </div>
             
@@ -285,8 +285,14 @@
     </div>
 
     <script>
+        // ===== LISTA DE PÁGINAS =====
+        // Para añadir una página: sube la foto a la carpeta "pages/" y añade una línea aquí.
+        const PAGES = [
+            { file: 'portada.jpg', label: 'Portada' },
+        ];
+
         let currentPage = 1;
-        const totalPages = 24;
+        const totalPages = PAGES.length;
         let currentZoom = 100;
         const zoomStep = 10;
         const minZoom = 50;
@@ -298,17 +304,18 @@
         const pageSlider = document.getElementById('pageSlider');
         const zoomDisplay = document.getElementById('zoomDisplay');
         
-        // Formatos de nombres: page-000.jpg, page-001.jpg, etc.
         function getImagePath(page) {
-            const num = String(page).padStart(3, '0');
-            return `page-${num}.jpg`;
+            return 'pages/' + PAGES[page - 1].file;
         }
+
+        document.getElementById('totalPages').textContent = totalPages;
+        pageSlider.max = totalPages;
         
         function loadPage(page) {
             if (page < 1 || page > totalPages) return;
             
             currentPage = page;
-            currentPageSpan.textContent = page;
+            currentPageSpan.textContent = page + (PAGES[page - 1].label ? ' · ' + PAGES[page - 1].label : '');
             pageSlider.value = page;
             
             loading.style.display = 'flex';
